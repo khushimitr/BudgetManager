@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: BudgetManager
+  datasource:
+    password: postgres
+    url: jdbc:postgresql://localhost:5432/budget_manager?currentSchema=public
+    username: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
