@@ -7,9 +7,9 @@ import jakarta.persistence.MappedSuperclass;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.budgetmanager.models.domain.listener.AuditEntityListener;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Data
 @MappedSuperclass
-@EntityListeners(AuditEntityListener.class)
+@EntityListeners(AuditingEntityListener.class)
 public abstract class AbstractAuditEntity {
 
     @CreatedDate

@@ -45,5 +45,6 @@ public class DataInitializer implements ApplicationRunner {
             if (!categoryService.existByName(category))
                 categoryService.save(Category.builder().name(category).build());
         });
+
     }
 }

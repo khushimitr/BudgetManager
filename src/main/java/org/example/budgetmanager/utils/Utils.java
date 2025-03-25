@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 
 public class Utils {
     public static String getCurrentUsernameFromAuthentication(Authentication authentication) {
@@ -46,4 +47,7 @@ public class Utils {
                 .sameSite("Lax") // "Lax/Strict"
                 .build();
     }
+
+    public static int CURRENT_MONTH = LocalDate.now().getMonthValue();
+    public static int CURRENT_YEAR = LocalDate.now().getYear();
 }

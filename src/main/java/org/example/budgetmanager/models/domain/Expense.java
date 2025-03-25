@@ -6,6 +6,7 @@ import lombok.*;
 import org.example.budgetmanager.models.enums.ExpenseType;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Getter
 @Entity
@@ -23,10 +24,14 @@ public class Expense extends AbstractAuditEntity {
     @ManyToOne
     private Category category;
 
+    @Enumerated(EnumType.STRING)
     private ExpenseType expenseType;
 
+    @Column(precision = 19, scale = 2)
     private BigDecimal amount;
 
     @ManyToOne
     private User user;
+
+    private LocalDate date;
 }
