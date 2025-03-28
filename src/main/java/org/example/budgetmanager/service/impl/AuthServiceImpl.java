@@ -5,11 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.budgetmanager.config.security.jwt.JwtUtils;
 import org.example.budgetmanager.config.security.service.UserDetailsImpl;
 import org.example.budgetmanager.models.domain.User;
-import org.example.budgetmanager.models.dto.AuthRespDto;
-import org.example.budgetmanager.models.dto.LoginReqDto;
-import org.example.budgetmanager.models.dto.RegisterReqDto;
+import org.example.budgetmanager.models.dto.RequestDTOs.LoginReqDto;
+import org.example.budgetmanager.models.dto.RequestDTOs.RegisterReqDto;
+import org.example.budgetmanager.models.dto.ResponseDTOs.AuthRespDto;
 import org.example.budgetmanager.repository.UserRepository;
 import org.example.budgetmanager.service.AuthService;
+import org.example.budgetmanager.service.BudgetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    BudgetService budgetService;
 
     @Override
     public ResponseEntity<?> login(LoginReqDto loginReqDto) {
@@ -87,6 +91,10 @@ public class AuthServiceImpl implements AuthService {
                 .authorities(null)
                 .password(savedUser.getPassword())
                 .build());
+
+        // initial call to save budget as 0
+        budgetService.initialSaveForUser(savedUser);
+
         return ResponseEntity.status(HttpStatus.OK)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
                 .body(AuthRespDto.builder()

@@ -1,9 +1,9 @@
 package org.example.budgetmanager.controller;
 
 
-import org.example.budgetmanager.models.dto.RequestDTOs.ExpenseRequestDto;
-import org.example.budgetmanager.models.dto.ResponseDTOs.ExpenseResponseDto;
-import org.example.budgetmanager.service.ExpenseService;
+import org.example.budgetmanager.models.dto.RequestDTOs.RecurringItemRequestDto;
+import org.example.budgetmanager.models.dto.ResponseDTOs.RecurringItemResponseDto;
+import org.example.budgetmanager.service.RecurringItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -13,44 +13,44 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.file.AccessDeniedException;
 
 @RestController
-@RequestMapping("/api/expense")
-public class ExpenseController {
+@RequestMapping("/api/subscription")
+public class RecurringItemController {
 
     @Autowired
-    ExpenseService expenseService;
+    RecurringItemService recurringItemService;
 
     @PostMapping
-    public ResponseEntity<?> addExpense(@RequestBody ExpenseRequestDto expenseReq) {
-        ExpenseResponseDto responseDto = expenseService.createExpense(expenseReq);
+    public ResponseEntity<?> addRecurringItem(@RequestBody RecurringItemRequestDto recurringItemReq) {
+        RecurringItemResponseDto responseDto = recurringItemService.createRecurringItem(recurringItemReq);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDto);
     }
 
-    @PutMapping("/{expenseId}")
-    public ResponseEntity<?> updateExpense(
-            @RequestBody ExpenseRequestDto expenseReq,
-            @PathVariable Integer expenseId
+    @PutMapping("/{recurringItemId}")
+    public ResponseEntity<?> updateRecurringItem(
+            @RequestBody RecurringItemRequestDto recurringItemReq,
+            @PathVariable Integer recurringItemId
     ) throws AccessDeniedException {
-        ExpenseResponseDto responseDto = expenseService.updateExpense(expenseId, expenseReq);
+        RecurringItemResponseDto responseDto = recurringItemService.updateRecurringItem(recurringItemId, recurringItemReq);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDto);
     }
 
-    @DeleteMapping("/{expenseId}")
+    @DeleteMapping("/{recurringItemId}")
     public ResponseEntity<?> deleteExpense(
-            @PathVariable Integer expenseId
+            @PathVariable Integer recurringItemId
     ) {
-        expenseService.deleteExpense(expenseId);
+        recurringItemService.deleteRecurringItem(recurringItemId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping("/history")
+    @GetMapping
     public ResponseEntity<?> showAllTransactions(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        Page<ExpenseResponseDto> expenseHistory = expenseService.getExpenseLogHistory(page, size);
+        Page<RecurringItemResponseDto> responseDtos = recurringItemService.getAllRecurringItems(page, size);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(expenseHistory);
+                .body(responseDtos);
     }
 }

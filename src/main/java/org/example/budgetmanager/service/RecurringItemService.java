@@ -6,12 +6,12 @@ import org.springframework.data.domain.Page;
 
 import java.nio.file.AccessDeniedException;
 
-public interface RecurringService {
+public interface RecurringItemService {
     RecurringItemResponseDto createRecurringItem(RecurringItemRequestDto recurringItemRequest);
 
     void deleteRecurringItem(Integer recurringItemId);
 
-    RecurringItemResponseDto updateExpense(Integer recurringItemId, RecurringItemRequestDto recurringItemRequest) throws AccessDeniedException;
+    RecurringItemResponseDto updateRecurringItem(Integer recurringItemId, RecurringItemRequestDto recurringItemRequest) throws AccessDeniedException;
 
     Page<RecurringItemResponseDto> getAllRecurringItems(int page, int size);
 

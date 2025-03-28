@@ -4,6 +4,6 @@ public enum ExpenseType {
     EXPEND,
     INCOME,
     SAVINGS,
-    LOAN,
-    LEND
+//    LOAN,
+//    LEND
 }

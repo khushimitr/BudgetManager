@@ -1,17 +1,14 @@
+package org.example.budgetmanager.models.dto.RequestDTOs;
+
 import lombok.*;
-import java.util.*;
-import java.time.*;
+
+import java.math.BigDecimal;
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BudgetDto {
-
-    private Long id;
-    private User user;
-    private String month;
-    private String year;
+@Data
+public class BudgetRequestDto {
     private BigDecimal budget;
-
 }

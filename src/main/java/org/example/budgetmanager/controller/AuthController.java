@@ -2,8 +2,8 @@ package org.example.budgetmanager.controller;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.budgetmanager.models.dto.LoginReqDto;
-import org.example.budgetmanager.models.dto.RegisterReqDto;
+import org.example.budgetmanager.models.dto.RequestDTOs.LoginReqDto;
+import org.example.budgetmanager.models.dto.RequestDTOs.RegisterReqDto;
 import org.example.budgetmanager.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

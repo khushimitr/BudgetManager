@@ -2,6 +2,7 @@ package org.example.budgetmanager.models.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.budgetmanager.models.enums.Category;
 import org.example.budgetmanager.models.enums.ExpenseType;
 
 import java.math.BigDecimal;
@@ -19,11 +20,12 @@ public class Loan extends AbstractAuditEntity {
 
     private String description;
 
+    @Enumerated(EnumType.STRING)
     private ExpenseType expenseType;
 
-    @ManyToOne
     private Category category;
 
+    @Column(precision = 19, scale = 2)
     private BigDecimal amount;
 
     @ManyToOne

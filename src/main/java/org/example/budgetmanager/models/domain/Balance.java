@@ -27,5 +27,6 @@ public class Balance {
     @Column(nullable = false)
     private String username;
 
+    @Column(precision = 19, scale = 2)
     private BigDecimal amount;
 }

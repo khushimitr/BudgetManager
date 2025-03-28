@@ -1,6 +1,8 @@
 package org.example.budgetmanager.utils;
 
 import org.example.budgetmanager.config.security.service.UserDetailsImpl;
+import org.example.budgetmanager.models.enums.Category;
+import org.example.budgetmanager.models.enums.ExpenseType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -46,6 +48,20 @@ public class Utils {
                 .maxAge(86400) // 1 day
                 .sameSite("Lax") // "Lax/Strict"
                 .build();
+    }
+
+    public static ExpenseType getExpenseTypeFromCategory(Category category) {
+        switch (category) {
+            case Investments -> {
+                return ExpenseType.SAVINGS;
+            }
+            case Income -> {
+                return ExpenseType.INCOME;
+            }
+            default -> {
+                return ExpenseType.EXPEND;
+            }
+        }
     }
 
     public static int CURRENT_MONTH = LocalDate.now().getMonthValue();

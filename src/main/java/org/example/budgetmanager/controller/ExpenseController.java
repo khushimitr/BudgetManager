@@ -1,16 +1,18 @@
 package org.example.budgetmanager.controller;
 
 
-import org.example.budgetmanager.models.domain.Expense;
-import org.example.budgetmanager.models.dto.DashboardResponseDto;
-import org.example.budgetmanager.models.dto.ExpenseDto;
+import org.example.budgetmanager.models.dto.RequestDTOs.ExpenseRequestDto;
+import org.example.budgetmanager.models.dto.RequestDTOs.RawExpenseRequestDto;
+import org.example.budgetmanager.models.dto.ResponseDTOs.ExpenseResponseDto;
+import org.example.budgetmanager.service.ExpenseClassifierService;
 import org.example.budgetmanager.service.ExpenseService;
-import org.example.budgetmanager.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.nio.file.AccessDeniedException;
 
 @RestController
 @RequestMapping("/api/expense")
@@ -19,35 +21,42 @@ public class ExpenseController {
     @Autowired
     ExpenseService expenseService;
 
+    @Autowired
+    ExpenseClassifierService classifierService;
+
     @PostMapping
-    public ResponseEntity<?> addExpense(@RequestBody Expense expenseReq) {
-        Expense savedExpense = expenseService.save(expenseReq);
+    public ResponseEntity<?> addExpense(@RequestBody RawExpenseRequestDto expenseReq) {
+        ExpenseRequestDto requestDto = classifierService.categorize(expenseReq.getDescription());
+        ExpenseResponseDto responseDto = expenseService.createExpense(requestDto);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(savedExpense);
+                .body(responseDto);
     }
 
+    @PutMapping("/{expenseId}")
+    public ResponseEntity<?> updateExpense(
+            @RequestBody ExpenseRequestDto expenseReq,
+            @PathVariable Integer expenseId
+    ) throws AccessDeniedException {
+        ExpenseResponseDto responseDto = expenseService.updateExpense(expenseId, expenseReq);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDto);
+    }
 
-    @GetMapping("/dashboards")
-    public ResponseEntity<?> showDashBoards(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) Integer month,
-            @RequestParam(required = false) Integer year
+    @DeleteMapping("/{expenseId}")
+    public ResponseEntity<?> deleteExpense(
+            @PathVariable Integer expenseId
     ) {
-        int resolvedMonth = month == null ? Utils.CURRENT_MONTH : month;
-        int resolvedYear = year == null ? Utils.CURRENT_YEAR : year;
-        DashboardResponseDto response = expenseService.getReports(page, size, resolvedMonth, resolvedYear);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(response);
+        expenseService.deleteExpense(expenseId);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping("/transactions")
+    @GetMapping("/history")
     public ResponseEntity<?> showAllTransactions(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        Page<ExpenseDto> transactions = expenseService.getAllTransactions(page, size);
+        Page<ExpenseResponseDto> expenseHistory = expenseService.getExpenseLogHistory(page, size);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(transactions);
+                .body(expenseHistory);
     }
 }

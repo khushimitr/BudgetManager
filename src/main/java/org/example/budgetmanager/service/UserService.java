@@ -1,7 +1,6 @@
 package org.example.budgetmanager.service;
 
 import org.example.budgetmanager.models.domain.User;
-import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
@@ -20,4 +19,6 @@ public interface UserService {
     User save(User user);
 
     void deleteById(Integer id);
+
+    User getReferenceById(Integer userId);
 }

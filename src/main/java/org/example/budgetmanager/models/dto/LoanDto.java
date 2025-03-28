@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.budgetmanager.models.domain.Category;
+import org.example.budgetmanager.models.enums.Category;
 import org.example.budgetmanager.models.enums.ExpenseType;
 import org.example.budgetmanager.models.enums.SplitType;
 

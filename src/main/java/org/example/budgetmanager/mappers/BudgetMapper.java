@@ -1,45 +1,39 @@
 package org.example.budgetmanager.mappers;
 
-import org.example.budgetmanager.models.domain.Expense;
-import org.example.budgetmanager.models.dto.RequestDTOs.ExpenseRequestDto;
-import org.example.budgetmanager.models.dto.ResponseDTOs.ExpenseResponseDto;
+import org.example.budgetmanager.models.domain.Budget;
+import org.example.budgetmanager.models.dto.RequestDTOs.BudgetRequestDto;
+import org.example.budgetmanager.models.dto.ResponseDTOs.BudgetResponseDto;
 import org.springframework.stereotype.Component;
 
-import java.math.RoundingMode;
 import java.util.List;
 
 @Component
-public class ExpenseMapper implements DTOMapper<Expense, ExpenseRequestDto, ExpenseResponseDto> {
+public class BudgetMapper implements DTOMapper<Budget, BudgetRequestDto, BudgetResponseDto> {
     @Override
-    public Expense toEntity(ExpenseRequestDto requestDto) {
-        // category and user will be filled at service layer
-        return Expense.builder()
-                .description(requestDto.getDescription())
-                .expenseType(requestDto.getExpenseType())
-                .amount(requestDto.getAmount())
-                .date(requestDto.getDate())
+    public Budget toEntity(BudgetRequestDto requestDto) {
+        // month, year and user will be filled at service layer
+        return Budget.builder()
+                .budget(requestDto.getBudget())
                 .build();
     }
 
     @Override
-    public ExpenseResponseDto toResponseDTO(Expense entity) {
-        return ExpenseResponseDto.builder()
+    public BudgetResponseDto toResponseDTO(Budget entity) {
+        return BudgetResponseDto.builder()
                 .id(entity.getId())
-                .category(entity.getCategory().getName())
-                .description(entity.getDescription())
-                .expenseType(entity.getExpenseType())
-                .date(entity.getDate())
-                .amount(entity.getAmount().setScale(2, RoundingMode.HALF_UP))
+                .budget(entity.getBudget())
+                .month(entity.getCreatedAt().getMonth().toString())
+                .year(String.valueOf(entity.getCreatedAt().getYear()))
                 .build();
     }
 
     @Override
-    public List<Expense> toEntityList(List<ExpenseRequestDto> requestDtoList) {
+    public List<Budget> toEntityList(List<BudgetRequestDto> requestDtoList) {
         return requestDtoList.stream().map(this::toEntity).toList();
     }
 
     @Override
-    public List<ExpenseResponseDto> toResponseDTOList(List<Expense> entityList) {
+    public List<BudgetResponseDto> toResponseDTOList(List<Budget> entityList) {
         return entityList.stream().map(this::toResponseDTO).toList();
     }
 }

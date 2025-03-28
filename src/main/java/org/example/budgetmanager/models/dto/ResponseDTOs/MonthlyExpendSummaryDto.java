@@ -1,18 +1,24 @@
-package org.example.budgetmanager.models.dto;
+package org.example.budgetmanager.models.dto.ResponseDTOs;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-@Data
+
+@Builder
 @NoArgsConstructor
+@Data
 public class MonthlyExpendSummaryDto {
     String month;
-    BigDecimal amount;
+    BigDecimal totalExpendAmount;
+    BigDecimal totalIncomeAmount;
 
-    public MonthlyExpendSummaryDto(String month, BigDecimal amount) {
+
+    public MonthlyExpendSummaryDto(String month, BigDecimal totalExpendAmount, BigDecimal totalIncomeAmount) {
         this.month = month.trim();
-        this.amount = amount;
+        this.totalExpendAmount = totalExpendAmount;
+        this.totalIncomeAmount = totalIncomeAmount;
     }
 }

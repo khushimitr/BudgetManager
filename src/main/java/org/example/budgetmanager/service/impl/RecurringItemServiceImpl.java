@@ -2,14 +2,12 @@ package org.example.budgetmanager.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.budgetmanager.mappers.RecurringItemMapper;
-import org.example.budgetmanager.models.domain.Category;
 import org.example.budgetmanager.models.domain.RecurringItem;
 import org.example.budgetmanager.models.domain.User;
 import org.example.budgetmanager.models.dto.RequestDTOs.RecurringItemRequestDto;
 import org.example.budgetmanager.models.dto.ResponseDTOs.RecurringItemResponseDto;
 import org.example.budgetmanager.repository.RecurringsRepository;
-import org.example.budgetmanager.service.CategoryService;
-import org.example.budgetmanager.service.RecurringService;
+import org.example.budgetmanager.service.RecurringItemService;
 import org.example.budgetmanager.service.UserService;
 import org.example.budgetmanager.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,16 +23,13 @@ import java.nio.file.AccessDeniedException;
 
 @Slf4j
 @Service
-public class RecurringServiceImpl implements RecurringService {
+public class RecurringItemServiceImpl implements RecurringItemService {
 
     @Autowired
     RecurringsRepository recurringsRepository;
 
     @Autowired
     UserService userService;
-
-    @Autowired
-    CategoryService categoryService;
 
     @Autowired
     RecurringItemMapper recurringItemMapper;
@@ -44,17 +39,14 @@ public class RecurringServiceImpl implements RecurringService {
     public RecurringItemResponseDto createRecurringItem(RecurringItemRequestDto recurringItemRequest) {
         RecurringItem recurringItem = recurringItemMapper.toEntity(recurringItemRequest);
 
-        String username = Utils.getCurrentUsernameFromAuthentication(SecurityContextHolder.getContext().getAuthentication());
-        User user = userService.getUserByUsername(username);
-        Category category = categoryService.findById(recurringItem.getCategory().getId()).orElseThrow(
-                () -> new ResourceNotFoundException("Category not found")
-        );
+        Integer userId = Utils.getCurrentUserIdFromAuthentication(SecurityContextHolder.getContext().getAuthentication());
+        User proxyUser = userService.getReferenceById(userId);
 
-        recurringItem.setUser(user);
-        recurringItem.setCategory(category);
+        recurringItem.setUser(proxyUser);
         RecurringItem savedRecurringItem = recurringsRepository.save(recurringItem);
-        log.debug("Created a new recurring Item : {}", savedRecurringItem);
-        return recurringItemMapper.toResponseDTO(savedRecurringItem);
+        RecurringItemResponseDto responseDTO = recurringItemMapper.toResponseDTO(savedRecurringItem);
+        log.debug("Created a new recurring Item : {}", responseDTO);
+        return responseDTO;
     }
 
     @Override
@@ -64,12 +56,12 @@ public class RecurringServiceImpl implements RecurringService {
     }
 
     @Override
-    public RecurringItemResponseDto updateExpense(Integer recurringItemId, RecurringItemRequestDto recurringItemRequest) throws AccessDeniedException {
+    public RecurringItemResponseDto updateRecurringItem(Integer recurringItemId, RecurringItemRequestDto recurringItemRequest) throws AccessDeniedException {
         RecurringItem existingRecurringItem = recurringsRepository.findById(recurringItemId)
                 .orElseThrow(() -> new ResourceNotFoundException("Recurring Item not found"));
 
-        String username = Utils.getCurrentUsernameFromAuthentication(SecurityContextHolder.getContext().getAuthentication());
-        if (!existingRecurringItem.getUser().getUsername().equals(username)) {
+        Integer userId = Utils.getCurrentUserIdFromAuthentication(SecurityContextHolder.getContext().getAuthentication());
+        if (!existingRecurringItem.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("You cannot update this Recurring Item");
         }
 
@@ -80,10 +72,8 @@ public class RecurringServiceImpl implements RecurringService {
         if (recurringItemRequest.getServiceName() != null) {
             existingRecurringItem.setServiceName(recurringItemRequest.getServiceName());
         }
-        if (recurringItemRequest.getCategoryId() != null) {
-            Category category = categoryService.findById(recurringItemRequest.getCategoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-            existingRecurringItem.setCategory(category);
+        if (recurringItemRequest.getCategory() != null) {
+            existingRecurringItem.setCategory(recurringItemRequest.getCategory());
         }
         if (recurringItemRequest.getCronExpression() != null) {
             existingRecurringItem.setCronExpression(recurringItemRequest.getCronExpression());
@@ -96,15 +86,16 @@ public class RecurringServiceImpl implements RecurringService {
         }
 
         RecurringItem savedRecurringItem = recurringsRepository.save(existingRecurringItem);
-        log.debug("Modified recurringItem entry : {}", savedRecurringItem);
-        return recurringItemMapper.toResponseDTO(savedRecurringItem);
+        RecurringItemResponseDto responseDTO = recurringItemMapper.toResponseDTO(savedRecurringItem);
+        log.debug("Modified recurringItem entry : {}", responseDTO);
+        return responseDTO;
     }
 
 
     @Override
     public Page<RecurringItemResponseDto> getAllRecurringItems(int page, int size) {
         Integer userId = Utils.getCurrentUserIdFromAuthentication(SecurityContextHolder.getContext().getAuthentication());
-        Pageable pageable = PageRequest.of(page, size, Sort.by("created_at").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         return recurringsRepository.findAllByUser_Id(userId, pageable).map(item -> recurringItemMapper.toResponseDTO(item));
     }
