@@ -1,9 +1,6 @@
 package org.example.budgetmanager.models.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.example.budgetmanager.models.domain.Expense;
 import org.example.budgetmanager.models.enums.ExpenseType;
 
@@ -15,7 +12,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExpenseDto {
+@Setter
+public class ExpenseResponseDto {
 
     private String description;
     private String category;
@@ -23,8 +21,8 @@ public class ExpenseDto {
     private BigDecimal amount;
     private LocalDate date;
 
-    public static ExpenseDto toDto(Expense expense) {
-        return ExpenseDto.builder()
+    public static ExpenseResponseDto toDto(Expense expense) {
+        return ExpenseResponseDto.builder()
                 .category(expense.getCategory().getName())
                 .description(expense.getDescription())
                 .expenseType(expense.getExpenseType())
@@ -33,8 +31,8 @@ public class ExpenseDto {
                 .build();
     }
 
-    public static List<ExpenseDto> expenseListToExpenseDtoList(List<Expense> expenses) {
-        return expenses.stream().map(ExpenseDto::toDto).toList();
+    public static List<ExpenseResponseDto> expenseListToExpenseDtoList(List<Expense> expenses) {
+        return expenses.stream().map(ExpenseResponseDto::toDto).toList();
     }
 
 }

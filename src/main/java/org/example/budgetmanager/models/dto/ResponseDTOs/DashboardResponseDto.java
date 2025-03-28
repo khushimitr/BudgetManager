@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.budgetmanager.models.dto.ResponseDTOs.ExpenseResponseDto;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -15,6 +16,6 @@ import java.util.List;
 public class DashboardResponseDto {
     List<ExpenseSummaryDto> expenseSummary;
     List<CategoryExpendSummaryDto> categoryExpendSummary;
-    Page<ExpenseDto> logHistory;
+    Page<ExpenseResponseDto> logHistory;
     List<MonthlyExpendSummaryDto> monthlyExpendSummary;
 }
