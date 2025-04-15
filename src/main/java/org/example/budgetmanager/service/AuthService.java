@@ -10,4 +10,8 @@ public interface AuthService {
 
     ResponseEntity<?> register(RegisterReqDto registerReqDto);
 
+    ResponseEntity<?> getMe();
+
+    ResponseEntity<?> logout();
+
 }

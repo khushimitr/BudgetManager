@@ -48,7 +48,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Integer> {
     @Query("""
             SELECT NEW org.example.budgetmanager.models.dto.ResponseDTOs.CategoryExpendSummaryDto(e.category,SUM(e.amount))
             FROM Expense e
-            WHERE e.expenseType = 'EXPEND' AND e.user.id = :userId
+            WHERE e.expenseType = 'EXPENSE' AND e.user.id = :userId
               AND EXTRACT(YEAR FROM e.date) = :year
               AND EXTRACT(MONTH FROM e.date) = :month
             GROUP BY e.category
@@ -57,16 +57,22 @@ public interface ExpenseRepository extends JpaRepository<Expense, Integer> {
 
 
     @Query("""
-            SELECT NEW org.example.budgetmanager.models.dto.ResponseDTOs.MonthlyExpendSummaryDto(TO_CHAR(e.date, 'Month') AS month,
-                SUM(e.amount) AS totalExpendAmount,
-                SUM(e.amount) AS totalIncomeAmount)
+            SELECT NEW org.example.budgetmanager.models.dto.ResponseDTOs.MonthlyExpendSummaryDto(
+                TO_CHAR(e.date, 'Month'),
+                SUM(CASE WHEN e.expenseType = 'EXPENSE' THEN e.amount ELSE 0 END),
+                SUM(CASE WHEN e.expenseType = 'INCOME' THEN e.amount ELSE 0 END)
+            )
             FROM Expense e
             WHERE e.user.id = :userId
               AND EXTRACT(YEAR FROM e.date) = :year
-            GROUP BY e.expenseType, TO_CHAR(e.date, 'Month'), EXTRACT(MONTH FROM e.date)
+            GROUP BY TO_CHAR(e.date, 'Month'),
+                     EXTRACT(MONTH FROM e.date)
             ORDER BY EXTRACT(MONTH FROM e.date)
             """)
-    List<MonthlyExpendSummaryDto> getMonthlyExpenditureSummary(@Param("userId") Integer userId, @Param("year") Integer year);
+    List<MonthlyExpendSummaryDto> getMonthlyExpenditureSummary(
+            @Param("userId") Integer userId,
+            @Param("year") Integer year
+    );
 
 
     @Override

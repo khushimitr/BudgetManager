@@ -1,9 +1,7 @@
 package org.example.budgetmanager.models.enums;
 
 public enum ExpenseType {
-    EXPEND,
+    EXPENSE,
     INCOME,
-    SAVINGS,
-//    LOAN,
-//    LEND
+    SAVINGS
 }

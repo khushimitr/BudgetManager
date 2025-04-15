@@ -26,5 +26,7 @@ public class User extends AbstractAuditEntity {
 
     @Column(nullable = false)
     private String password;
+    
+    private String avatarUrl;
 
 }

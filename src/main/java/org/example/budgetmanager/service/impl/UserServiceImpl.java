@@ -1,17 +1,20 @@
 package org.example.budgetmanager.service.impl;
 
+import org.example.budgetmanager.exception.general.ResourceNotFoundException;
 import org.example.budgetmanager.models.domain.User;
 import org.example.budgetmanager.repository.UserRepository;
 import org.example.budgetmanager.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
-    @Autowired
-    UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public UserServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     public Optional<User> findByUsername(String username) {
@@ -30,12 +33,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByUsername(String username) {
-        return userRepository.getUserByUsername(username);
+        return userRepository.getUserByUsername(username).orElseThrow(
+                () -> new ResourceNotFoundException("User doesn't exist with username : " + username)
+        );
     }
 
     @Override
     public User getUserById(Integer id) {
-        return userRepository.getUserById(id);
+        return userRepository.getUserById(id).orElseThrow(
+                () -> new ResourceNotFoundException("User doesn't exist with userId : " + id)
+        );
     }
 
     @Override

@@ -59,11 +59,12 @@ public class Utils {
                 return ExpenseType.INCOME;
             }
             default -> {
-                return ExpenseType.EXPEND;
+                return ExpenseType.EXPENSE;
             }
         }
     }
 
     public static int CURRENT_MONTH = LocalDate.now().getMonthValue();
     public static int CURRENT_YEAR = LocalDate.now().getYear();
+    public static String AVATAR_URL = "https://api.dicebear.com/6.x/thumbs/svg?seed=";
 }

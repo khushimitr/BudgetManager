@@ -7,6 +7,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
+import java.util.Arrays;
 import java.util.Date;
 
 
@@ -21,7 +23,7 @@ import java.util.Date;
 @Component
 public class JwtUtils {
 
-    public static final Long JWT_TOKEN_EXPIRES_AFTER = 60480000L;
+    public static final Long JWT_TOKEN_EXPIRES_AFTER = 2592000000L;
     public static final String JWT_SECRET_KEY = "Ght385FvnjU54fhasjkdjahl798q9dlashdohi0GF4578JNKkhfR466utVjh"; // dev Only
 
     public String getJWTFromHeader(HttpServletRequest request) {
@@ -33,8 +35,22 @@ public class JwtUtils {
         return null;
     }
 
+    public String getJWTFromCookie(HttpServletRequest request) {
+        if (request.getCookies() == null) {
+            return null;
+        }
+
+        String token = Arrays.stream(request.getCookies())
+                .filter(cookie -> "access_token".equals(cookie.getName()))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElse(null);
+        return token;
+    }
+
     public String generateTokenFromUserDetails(UserDetails userDetails) {
         String username = userDetails.getUsername();
+
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date())

@@ -4,7 +4,6 @@ package org.example.budgetmanager.controller;
 import org.example.budgetmanager.models.dto.RequestDTOs.RecurringItemRequestDto;
 import org.example.budgetmanager.models.dto.ResponseDTOs.RecurringItemResponseDto;
 import org.example.budgetmanager.service.RecurringItemService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +15,11 @@ import java.nio.file.AccessDeniedException;
 @RequestMapping("/api/subscription")
 public class RecurringItemController {
 
-    @Autowired
-    RecurringItemService recurringItemService;
+    private final RecurringItemService recurringItemService;
+
+    public RecurringItemController(RecurringItemService recurringItemService) {
+        this.recurringItemService = recurringItemService;
+    }
 
     @PostMapping
     public ResponseEntity<?> addRecurringItem(@RequestBody RecurringItemRequestDto recurringItemReq) {

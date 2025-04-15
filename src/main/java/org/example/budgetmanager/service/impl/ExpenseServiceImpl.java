@@ -2,6 +2,8 @@ package org.example.budgetmanager.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.example.budgetmanager.exception.general.ForbiddenException;
+import org.example.budgetmanager.exception.general.ResourceNotFoundException;
 import org.example.budgetmanager.mappers.ExpenseMapper;
 import org.example.budgetmanager.models.domain.Expense;
 import org.example.budgetmanager.models.domain.User;
@@ -9,15 +11,14 @@ import org.example.budgetmanager.models.dto.RequestDTOs.ExpenseRequestDto;
 import org.example.budgetmanager.models.dto.ResponseDTOs.*;
 import org.example.budgetmanager.models.enums.ExpenseType;
 import org.example.budgetmanager.repository.ExpenseRepository;
+import org.example.budgetmanager.service.BudgetService;
 import org.example.budgetmanager.service.ExpenseService;
 import org.example.budgetmanager.service.UserService;
 import org.example.budgetmanager.utils.Utils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -34,14 +35,20 @@ import java.util.Objects;
 @Service
 public class ExpenseServiceImpl implements ExpenseService {
 
-    @Autowired
-    ExpenseRepository expenseRepository;
+    private final ExpenseRepository expenseRepository;
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    ExpenseMapper expenseMapper;
+    private final ExpenseMapper expenseMapper;
+
+    private final BudgetService budgetService;
+
+    public ExpenseServiceImpl(ExpenseRepository expenseRepository, UserService userService, ExpenseMapper expenseMapper, BudgetService budgetService) {
+        this.expenseRepository = expenseRepository;
+        this.userService = userService;
+        this.expenseMapper = expenseMapper;
+        this.budgetService = budgetService;
+    }
 
     @Transactional
     @Override
@@ -67,11 +74,11 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     public ExpenseResponseDto updateExpense(Integer expenseId, ExpenseRequestDto expenseRequest) throws AccessDeniedException {
         Expense existingExpense = expenseRepository.findById(expenseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Expense not found with id : " + expenseId));
 
         Integer userId = Utils.getCurrentUserIdFromAuthentication(SecurityContextHolder.getContext().getAuthentication());
         if (!existingExpense.getUser().getId().equals(userId)) {
-            throw new AccessDeniedException("You cannot update this expense");
+            throw new ForbiddenException("You cannot update this expense");
         }
 
         // Update only allowed fields
@@ -104,8 +111,9 @@ public class ExpenseServiceImpl implements ExpenseService {
 
 
     @Override
-    public DashboardResponseDto getReports(int page, int size, int month, int year) {
+    public DashboardResponseDto getReports(int month, int year) {
         Integer userId = Utils.getCurrentUserIdFromAuthentication(SecurityContextHolder.getContext().getAuthentication());
+
         List<ExpenseSummaryDto> expenseSummaryDtoList = expenseRepository.getExpenseSummariesByUserId(userId, month, year);
         for (ExpenseType expenseType : ExpenseType.values()) {
             if (expenseSummaryDtoList.stream().noneMatch(x -> x.getExpenseType() == expenseType)) {
@@ -133,19 +141,31 @@ public class ExpenseServiceImpl implements ExpenseService {
                 obj -> Month.valueOf(obj.getMonth().toUpperCase())
         ));
 
+        BudgetResponseDto budgetResponseDto = budgetService.getCurrentBudget(month, year);
+
+        BudgetExpenseSummaryDto budgetExpenseSummaryDto = BudgetExpenseSummaryDto.builder()
+                .budget(budgetResponseDto.getBudget())
+                .expense(expenseSummaryDtoList.stream()
+                        .filter(x -> x.getExpenseType() == ExpenseType.EXPENSE)
+                        .map(x -> x.getAmount())
+                        .findFirst().get()
+                )
+                .build();
+
         return DashboardResponseDto.builder()
                 .expenseSummary(expenseSummaryDtoList)
                 .categoryExpendSummary(categoryExpendSummaryDtoList)
                 .monthlyExpendSummary(monthlyExpendSummaryDtoList)
-                .logHistory(getExpenseLogHistory(page, size))
+                .budgetExpenseSummary(budgetExpenseSummaryDto)
                 .build();
     }
 
     @Override
     public Page<ExpenseResponseDto> getExpenseLogHistory(int page, int size) {
         Integer userId = Utils.getCurrentUserIdFromAuthentication(SecurityContextHolder.getContext().getAuthentication());
-        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         return expenseRepository.findByUserIdOrderByDateDesc(userId, pageable);
     }
+
 }

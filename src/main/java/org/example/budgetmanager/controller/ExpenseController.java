@@ -1,12 +1,13 @@
 package org.example.budgetmanager.controller;
 
 
+import org.example.budgetmanager.mappers.ExpenseMapper;
+import org.example.budgetmanager.models.dto.ExpenseClassifierResponse;
 import org.example.budgetmanager.models.dto.RequestDTOs.ExpenseRequestDto;
 import org.example.budgetmanager.models.dto.RequestDTOs.RawExpenseRequestDto;
 import org.example.budgetmanager.models.dto.ResponseDTOs.ExpenseResponseDto;
 import org.example.budgetmanager.service.ExpenseClassifierService;
 import org.example.budgetmanager.service.ExpenseService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,15 +19,22 @@ import java.nio.file.AccessDeniedException;
 @RequestMapping("/api/expense")
 public class ExpenseController {
 
-    @Autowired
-    ExpenseService expenseService;
+    private final ExpenseService expenseService;
 
-    @Autowired
-    ExpenseClassifierService classifierService;
+    private final ExpenseClassifierService classifierService;
+
+    private final ExpenseMapper expenseMapper;
+
+    public ExpenseController(ExpenseService expenseService, ExpenseClassifierService classifierService, ExpenseMapper expenseMapper) {
+        this.expenseService = expenseService;
+        this.classifierService = classifierService;
+        this.expenseMapper = expenseMapper;
+    }
 
     @PostMapping
     public ResponseEntity<?> addExpense(@RequestBody RawExpenseRequestDto expenseReq) {
-        ExpenseRequestDto requestDto = classifierService.categorize(expenseReq.getDescription());
+        ExpenseClassifierResponse response = classifierService.categorize(expenseReq.getDescription());
+        ExpenseRequestDto requestDto = expenseMapper.toRequestDto(response, expenseReq.getDescription());
         ExpenseResponseDto responseDto = expenseService.createExpense(requestDto);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDto);

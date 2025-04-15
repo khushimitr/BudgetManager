@@ -18,7 +18,7 @@ public interface ExpenseService {
 
     ExpenseResponseDto saveRecurringItems(Expense expenseReq);
 
-    DashboardResponseDto getReports(int page, int size, int month, int year);
+    DashboardResponseDto getReports(int month, int year);
 
     Page<ExpenseResponseDto> getExpenseLogHistory(int page, int size);
 }

@@ -9,12 +9,17 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BudgetRepository extends JpaRepository<Budget, Integer> {
 
-    @Query("SELECT b from Budget b where b.user.id = :userId ORDER BY b.createdAt DESC")
-    Budget findCurrBudgetByUserId(@Param("userId") Integer userId);
+    @Query("""
+            SELECT b from Budget b where b.user.id = :userId
+                        AND EXTRACT(YEAR FROM b.createdAt) = :year
+                                    AND EXTRACT(MONTH FROM b.createdAt) = :month
+            """)
+    Optional<Budget> findCurrBudgetByUserId(@Param("userId") Integer userId, @Param("month") Integer month, @Param("year") Integer year);
 
     Page<Budget> getAllByUser_Id(Integer userId, Pageable pageable);
 

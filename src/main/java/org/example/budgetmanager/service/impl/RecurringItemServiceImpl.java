@@ -1,6 +1,8 @@
 package org.example.budgetmanager.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.budgetmanager.exception.general.ForbiddenException;
+import org.example.budgetmanager.exception.general.ResourceNotFoundException;
 import org.example.budgetmanager.mappers.RecurringItemMapper;
 import org.example.budgetmanager.models.domain.RecurringItem;
 import org.example.budgetmanager.models.domain.User;
@@ -10,12 +12,10 @@ import org.example.budgetmanager.repository.RecurringsRepository;
 import org.example.budgetmanager.service.RecurringItemService;
 import org.example.budgetmanager.service.UserService;
 import org.example.budgetmanager.utils.Utils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -25,14 +25,17 @@ import java.nio.file.AccessDeniedException;
 @Service
 public class RecurringItemServiceImpl implements RecurringItemService {
 
-    @Autowired
-    RecurringsRepository recurringsRepository;
+    private final RecurringsRepository recurringsRepository;
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    RecurringItemMapper recurringItemMapper;
+    private final RecurringItemMapper recurringItemMapper;
+
+    public RecurringItemServiceImpl(RecurringsRepository recurringsRepository, UserService userService, RecurringItemMapper recurringItemMapper) {
+        this.recurringsRepository = recurringsRepository;
+        this.userService = userService;
+        this.recurringItemMapper = recurringItemMapper;
+    }
 
 
     @Override
@@ -58,11 +61,11 @@ public class RecurringItemServiceImpl implements RecurringItemService {
     @Override
     public RecurringItemResponseDto updateRecurringItem(Integer recurringItemId, RecurringItemRequestDto recurringItemRequest) throws AccessDeniedException {
         RecurringItem existingRecurringItem = recurringsRepository.findById(recurringItemId)
-                .orElseThrow(() -> new ResourceNotFoundException("Recurring Item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Recurring Item not found with id : " + recurringItemId));
 
         Integer userId = Utils.getCurrentUserIdFromAuthentication(SecurityContextHolder.getContext().getAuthentication());
         if (!existingRecurringItem.getUser().getId().equals(userId)) {
-            throw new AccessDeniedException("You cannot update this Recurring Item");
+            throw new ForbiddenException("You cannot update this Recurring Item");
         }
 
         // Update only allowed fields

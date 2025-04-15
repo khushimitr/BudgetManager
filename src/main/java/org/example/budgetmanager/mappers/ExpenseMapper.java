@@ -1,13 +1,12 @@
 package org.example.budgetmanager.mappers;
 
 import org.example.budgetmanager.models.domain.Expense;
+import org.example.budgetmanager.models.dto.ExpenseClassifierResponse;
 import org.example.budgetmanager.models.dto.RequestDTOs.ExpenseRequestDto;
 import org.example.budgetmanager.models.dto.ResponseDTOs.ExpenseResponseDto;
-import org.example.budgetmanager.models.enums.Category;
 import org.example.budgetmanager.utils.Utils;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
@@ -48,16 +47,12 @@ public class ExpenseMapper implements DTOMapper<Expense, ExpenseRequestDto, Expe
         return entityList.stream().map(this::toResponseDTO).toList();
     }
 
-    public ExpenseRequestDto toRequestDto(String result, String userInput) {
-        String[] split = result.split(",");
-        Category category = Category.valueOf(split[0].trim());
-        BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(split[1]));
-
+    public ExpenseRequestDto toRequestDto(ExpenseClassifierResponse result, String description) {
         return ExpenseRequestDto.builder()
-                .description(userInput)
-                .category(category)
-                .amount(amount)
-                .expenseType(Utils.getExpenseTypeFromCategory(category))
+                .description(description)
+                .category(result.getCategory())
+                .amount(result.getAmount())
+                .expenseType(Utils.getExpenseTypeFromCategory(result.getCategory()))
                 .date(LocalDate.now())
                 .build();
     }
